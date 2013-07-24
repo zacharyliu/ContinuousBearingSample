@@ -34,6 +34,10 @@ public class MainActivity extends Activity implements StepNavigationListener {
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.468184, -74.445385), 19));
 		mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(40.468184, -74.445385)));
 		mMap.setMyLocationEnabled(true);
+		
+		Log.d(TAG, "Connecting to service");
+		Intent intent = new Intent(this, StepNavigationService.class);
+		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 	}
 	
 	ServiceConnection mConnection = new ServiceConnection() {
@@ -51,15 +55,7 @@ public class MainActivity extends Activity implements StepNavigationListener {
 	}
 	
 	@Override
-	protected void onStart() {
-		super.onStart();
-		Log.d(TAG, "Connecting to service");
-		Intent intent = new Intent(this, StepNavigationService.class);
-		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-	};
-	
-	@Override
-	protected void onStop() {
+	protected void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "Disconnecting from service");
 		unbindService(mConnection);
