@@ -9,10 +9,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,60 +21,47 @@ import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationBinder;
 import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationListener;
 
 public class MainActivity extends Activity implements StepNavigationListener {
-
 	private final String TAG = "MainActivity";
-	private boolean isCalibrating;
 	private GoogleMap mMap;
 	private Marker mMarker;
-	private LatLng currentLoc;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		ToggleButton toggle = (ToggleButton) findViewById(R.id.calibrationToggle);
-		isCalibrating = toggle.isChecked();
-		toggle.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (((ToggleButton) v).isChecked()) {
-					isCalibrating = true;
-				} else {
-					isCalibrating = false;
-				}
-			}
-		});
-
-		currentLoc = new LatLng(40.468184, -74.445385);
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 19));
-		mMarker = mMap.addMarker(new MarkerOptions().position(currentLoc));
+		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.468184, -74.445385), 19));
+		mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(40.468184, -74.445385)));
 		mMap.setMyLocationEnabled(true);
 	}
 	
 	ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			Log.d(TAG, "Service connected");
-			StepNavigationService stepService = ((StepNavigationBinder) service).getService();
-			stepService.register(MainActivity.this);
+			((StepNavigationBinder) service).getService().register(MainActivity.this);
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {}
 	};
-
+	
+	@Override
+	public void onLocationUpdate(double latitude, double longitude) {
+		onNewLocation(new LatLng(latitude, longitude));
+	}
+	
 	@Override
 	protected void onStart() {
 		super.onStart();
 		Log.d(TAG, "Connecting to service");
 		Intent intent = new Intent(this, StepNavigationService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-	}
+	};
 	
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onStop() {
+		super.onDestroy();
+		Log.d(TAG, "Disconnecting from service");
 		unbindService(mConnection);
 	}
 	
@@ -89,20 +72,9 @@ public class MainActivity extends Activity implements StepNavigationListener {
 		return true;
 	}
 
-	private void display(int resId, double value) {
-		((TextView) findViewById(resId)).setText(Double.toString(value));
-	}
-
 	private void onNewLocation(LatLng loc) {
 		Log.d(TAG, "Got new location");
-		currentLoc = loc;
 		mMarker.setPosition(loc);
 		mMap.animateCamera(CameraUpdateFactory.newLatLng(loc));
 	}
-
-	@Override
-	public void onLocationUpdate(double latitude, double longitude) {
-		onNewLocation(new LatLng(latitude, longitude));
-	}
-
 }
