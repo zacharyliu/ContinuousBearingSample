@@ -1,10 +1,14 @@
 package com.zacharyliu.continuousbearingsample;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -16,6 +20,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.zacharyliu.stepnavigation.StepNavigationService;
 import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationBinder;
 import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationListener;
@@ -24,6 +30,8 @@ public class MainActivity extends Activity implements StepNavigationListener {
 	private final String TAG = "MainActivity";
 	private GoogleMap mMap;
 	private Marker mMarker;
+	private Polyline mLine;
+	private List<LatLng> locations = new ArrayList<LatLng>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +40,6 @@ public class MainActivity extends Activity implements StepNavigationListener {
 
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.468184, -74.445385), 19));
-		mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(40.468184, -74.445385)));
 		mMap.setMyLocationEnabled(true);
 		
 		Log.d(TAG, "Connecting to service");
@@ -70,7 +77,20 @@ public class MainActivity extends Activity implements StepNavigationListener {
 
 	private void onNewLocation(LatLng loc) {
 		Log.d(TAG, "Got new location");
-		mMarker.setPosition(loc);
+		if (mMarker == null) {
+			mMarker = mMap.addMarker(new MarkerOptions().position(loc));
+		} else {
+			mMarker.setPosition(loc);
+		}
+		
+		locations.add(loc);
+		
+		if (mLine == null) {
+			mLine = mMap.addPolyline(new PolylineOptions().color(Color.RED).addAll(locations));
+		} else {
+			mLine.setPoints(locations);
+		}
+		
 		mMap.animateCamera(CameraUpdateFactory.newLatLng(loc));
 	}
 }
