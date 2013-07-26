@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements StepNavigationListener {
 	
 	@Override
 	public void onLocationUpdate(double latitude, double longitude) {
-		onNewLocation(new LatLng(latitude, longitude));
+		newLocation(new LatLng(latitude, longitude));
 	}
 	
 	@Override
@@ -75,7 +75,7 @@ public class MainActivity extends Activity implements StepNavigationListener {
 		return true;
 	}
 
-	private void onNewLocation(LatLng loc) {
+	private void newLocation(LatLng loc) {
 		Log.d(TAG, "Got new location");
 		if (mMarker == null) {
 			mMarker = mMap.addMarker(new MarkerOptions().position(loc));
