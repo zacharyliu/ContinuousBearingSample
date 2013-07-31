@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
+import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,6 +34,7 @@ public class MainActivity extends Activity implements StepNavigationMultiListene
 	private Polyline mLine;
 	private List<LatLng> locations = new ArrayList<LatLng>();
 	private StepNavigationService mService;
+	private CSVWriter writer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,15 @@ public class MainActivity extends Activity implements StepNavigationMultiListene
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.468184, -74.445385), 19));
 		mMap.setMyLocationEnabled(true);
+		
+//		String filename = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CompassHeading" + Long.toString(System.currentTimeMillis()) + ".csv";
+//		Toast.makeText(this, "Logging to: " + filename, Toast.LENGTH_SHORT).show();
+//		try {
+//			writer = new CSVWriter(new FileWriter(filename));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		Log.d(TAG, "Connecting to service");
 		Intent intent = new Intent(this, StepNavigationService.class);
@@ -53,6 +64,12 @@ public class MainActivity extends Activity implements StepNavigationMultiListene
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mService = ((StepNavigationBinder) service).getService();
 			mService.register(MainActivity.this, StepNavigationService.TYPE_LOCATION);
+			mService.register(new StepNavigationMultiListener() {
+				@Override
+				public void onSensorChanged(int type, double[] values) {
+//					writer.writeNext(new String[] {Long.toString(System.currentTimeMillis()), "step"});
+				}
+			}, StepNavigationService.TYPE_STEP);
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {}
