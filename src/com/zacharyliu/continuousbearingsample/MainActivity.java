@@ -24,14 +24,15 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.zacharyliu.stepnavigation.StepNavigationService;
 import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationBinder;
-import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationListener;
+import com.zacharyliu.stepnavigation.StepNavigationService.StepNavigationMultiListener;
 
-public class MainActivity extends Activity implements StepNavigationListener {
+public class MainActivity extends Activity implements StepNavigationMultiListener {
 	private final String TAG = "MainActivity";
 	private GoogleMap mMap;
 	private Marker mMarker;
 	private Polyline mLine;
 	private List<LatLng> locations = new ArrayList<LatLng>();
+	private StepNavigationService mService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,15 +51,17 @@ public class MainActivity extends Activity implements StepNavigationListener {
 	ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			((StepNavigationBinder) service).getService().register(MainActivity.this);
+			mService = ((StepNavigationBinder) service).getService();
+			mService.register(MainActivity.this, StepNavigationService.TYPE_LOCATION);
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {}
 	};
 	
 	@Override
-	public void onLocationUpdate(double latitude, double longitude) {
-		newLocation(new LatLng(latitude, longitude));
+	public void onSensorChanged(int type, double[] values) {
+		if (type == StepNavigationService.TYPE_LOCATION)
+			newLocation(new LatLng(values[0], values[1]));
 	}
 	
 	@Override
