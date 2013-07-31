@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
-import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,7 +33,7 @@ public class MainActivity extends Activity implements StepNavigationMultiListene
 	private Polyline mLine;
 	private List<LatLng> locations = new ArrayList<LatLng>();
 	private StepNavigationService mService;
-	private CSVWriter writer;
+//	private CSVWriter writer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +49,6 @@ public class MainActivity extends Activity implements StepNavigationMultiListene
 //		try {
 //			writer = new CSVWriter(new FileWriter(filename));
 //		} catch (IOException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 		
